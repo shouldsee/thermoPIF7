@@ -1,0 +1,8 @@
+{
+    "DIR": ".", 
+    "fignames": [
+        "./qc_TempReponse.png", 
+        "./qc_PIF7Dependent.png", 
+        "./qc_Venn.png"
+    ]
+}
