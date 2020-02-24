@@ -1,0 +1,11 @@
+{
+    "FUNCTION": "!{plotters.venn_diagram}", 
+    "OFNAME": "venn-diagram-1.svg", 
+    "axis": {
+        "title": "Fisher exact test: p={pval}", 
+        "xlabel": "tempResponsive", 
+        "ylabel": "PIF7_Dependent"
+    }, 
+    "index1": "!{pyext.readData('/home/feng/static/figures/1126__PIF7__tempResp-AND-pif7Resp/Venn-index.csv',)['ind1']}", 
+    "index2": "!{pyext.readData('/home/feng/static/figures/1126__PIF7__tempResp-AND-pif7Resp/Venn-index.csv',)['ind2']}"
+}

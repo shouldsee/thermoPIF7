@@ -3,9 +3,15 @@
 # BACKEND='cairo'
 BACKEND='agg'
 NCORE = 10
+import os
+import simpleeval
 import pymisca.ext as pyext
-pyext.base__check()
-execfile(pyext.base__file('headers/header__import.py'))
+import pymisca.util as pyutil
+import synotil.countMatrix as scount
+from header_import import job_process,plotters
+from path import Path
+# from pymisca.plotters import 
+# execfile(os.path.join( os.path.dirname(__file__),'header__import.py'))
 figs = pyutil.collections.OrderedDict()
 
 
@@ -135,13 +141,16 @@ d = '''
     }
     },    
 ]
-
 '''
 pyext.printlines([d],'all-plots.json')
 d_s = simpleeval.EvalWithCompoundTypes().eval(d)
 # d_s = d_s[-2:]
 htmlLines=['<a href="./">Parent_Directory</a><br>',
           '<a href="all-plots.json">all-plots.json</a>']
-res = map(job__process,d_s);
-htmlLines.extend(res)
-pyext.printlines(htmlLines,'figure.html')
+
+if __name__ == '__main__':
+	with (Path(__file__)+'.result').makedirs_p() as d:
+		res = map(job_process,d_s);
+		htmlLines.extend(res)
+		pyext.printlines(htmlLines,'figure.html')
+	print('[INFO] results created in %s'%d.realpath())
