@@ -128,8 +128,8 @@ with Path(__file__).realpath().dirname().dirname() as d:
     tdf.head(2)
     # tdf.columns
 
-    meta = pyutil.readData('/home/feng/meta/meta_rna.tsv')
-    meta = meta.loc[~meta.index.isna()]
+#    meta = pyutil.readData('/home/feng/meta/meta_rna.tsv')
+#    meta = meta.loc[~meta.index.isna()]
     rnaseq= scount.countMatrix(rnaseq)
     mcurr = meta.query('SpecAcc=="Ath" & temp == "27C"')
     m1 = mcurr.query('gtype=="pif4-101"')
