@@ -16,12 +16,12 @@ import pymisca.vis_util as pyvis
 import pymisca.ext as pyext
 import collections
 import pandas as pd
-import pymisca.jinja2_util as pyjin
 
 #### data depdendency
 from short_header import job_process
 import deps.loadRNA_Ath as rnaseq
-
+templateFile = InputFile('deps/Templates.listImages.html').realpath()
+import jinja2
 
 
 if __name__ =='__main__':
@@ -35,6 +35,8 @@ if __name__ =='__main__':
     with Path(__file__+'.result').makedirs_p().realpath() as d:
 
 
+        ##############################################
+        ###-------------------------------------------
         _ = '''
         For each gene derive its temperature responsiveness by
         calculating at its dot-product similarity with a set of
@@ -80,8 +82,12 @@ if __name__ =='__main__':
         figs['qc_TempReponse'] = fig
         stats['tempResponsive'] = clu
         scores['tempResponsive'] = per_score
+        ###-------------------------------------------
+        ##############################################
 
 
+        ##############################################
+        ###-------------------------------------------
         _ = '''
         For each gene derive its PIF7-knockout responsiveness by
         calculating at its dot-product similarity with a set of
@@ -120,8 +126,12 @@ if __name__ =='__main__':
         figs['qc_PIF7Dependent'] = fig
         stats['PIF7Dependent']   = clu
         scores['PIF7Dependent'] = per_score
+        ###-------------------------------------------
+        ##############################################
 
 
+        ##############################################
+        ###-------------------------------------------
         _ = '''
         Venn diagram showing overlap between temperature-responsive gene
         and pif7ko-responsive genes
@@ -141,8 +151,12 @@ if __name__ =='__main__':
 
         OF = OutputFile('stats.csv')
         stats.to_csv(OF)
+        ###-------------------------------------------
+        ##############################################
 
 
+        ################ output figures  #############
+        ###-------------------------------------------
         def job_saveFig(
             figs,
             DIR,
@@ -151,7 +165,7 @@ if __name__ =='__main__':
             dpi = 160,
             ):
             templateFile = str(templateFile)
-            dfig = saveFigDict(figs,
+            dfig = saveFigDict(     figs,
                                       DIR='.',
                                       exts=exts,
                                       dpi = dpi)
@@ -160,13 +174,11 @@ if __name__ =='__main__':
             ofname = 'figures.json'
             pyext.printlines(buf,ofname)
             return dfig
-
-        templateFile = InputFile('/home/feng/Templates/listImages.html')
         dfig = job_saveFig(figs, d, templateFile)
-        ofname = pyjin.quickRender(str(templateFile),
-                                   context=dfig,
-                                   ofname= OutputFile(d / 'figure.html'),
-                                  )
+
+        with open(OutputFile(d/'figure.html'),'w') as fo:
+            buf = jinja2.Template(open(templateFile,'r').read()).render(**dfig)
+            fo.write(buf)
         print ('[OUTPUT]',ofname)
-    # assert 0
-    # import pdb;pdb.set_trace()
+        ###-------------------------------------------
+        ##############################################

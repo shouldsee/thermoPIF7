@@ -20,7 +20,8 @@ datasets_index = [
        'header_import.py':'import packages',
        'deps/key_ath.csv':'information of key genes of interest',
        'deps/meta_rna.csv':'meta information for the concerning RNA experiemnt',
-       'deps/rnaseq_log2p1.pk': 'RNASEQ count table /home/feng/envs/Fig_PIF/1031__rnaseq__log2p1.pk'
+       'deps/rnaseq_log2p1.pk': 'RNASEQ count table /home/feng/envs/Fig_PIF/1031__rnaseq__log2p1.pk',
+       'deps/Templates.listImages.html':'HTML template',
 }
 
 OF = 'deps/meta_rna.csv'
@@ -41,3 +42,8 @@ OF = 'deps/rnaseq_log2p1.pk'
 IF = '/home/feng/envs/Fig_PIF/1031__rnaseq__log2p1.pk'
 shutil.copy2(IF,OF)
 print(OF)
+
+
+OF = 'deps/Templates.listImages.html'
+IF ='/home/feng/Templates/listImages.html'
+shutil.copy2(IF,OF)
