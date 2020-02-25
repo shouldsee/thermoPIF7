@@ -1,1 +1,5 @@
-file_tracer@http://github.com/shouldsee/file_tracer/tarball/master
+#file-tracer@https://github.com/shouldsee/file_tracer/tarball/master
+pymisca@http://github.com/shouldsee/pymisca/tarball/master
+synotil@http://github.com/shouldsee/synotil/tarball/master
+path.py
+matplotlib

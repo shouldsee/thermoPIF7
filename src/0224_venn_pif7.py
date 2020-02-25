@@ -5,8 +5,12 @@ Use RNASEQ data to derive genes that show PIF7-dependent expression
 and temperature-dependent expression.
 '''
 DEBUG = 0
-from file_tracer import FileTracer,InputFile,OutputFile  
+# from file_tracer import FileTracer,InputFile,OutputFile  
 from path import Path
+class InputFile(Path):
+    pass
+class OutputFile(Path):
+    pass
 
 import matplotlib as mpl; mpl.use('agg')
 from pymisca.util import saveFigDict

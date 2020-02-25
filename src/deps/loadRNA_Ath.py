@@ -3,12 +3,13 @@ Loading datasets for PIF7
 '''
 
 from path import Path
+import synotil.CountMatrix as scount
+import pymisca.util as pyutil
+import pymisca.ext as pyext
+import pandas as pd
+
 with Path(__file__).realpath().dirname().dirname() as d:  
     # execfile('./header_import.py')
-    import synotil.CountMatrix as scount
-    import pymisca.util as pyutil
-    import pymisca.ext as pyext
-    import pandas as pd
 
     meta  = pyext.readData( 'deps/meta_rna.csv' )
     meta = meta.loc[~meta.index.isna()]
