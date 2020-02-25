@@ -5,7 +5,7 @@ python:
 #  - "3.5"
 cache: pip
 install:
-  - apt-get install -y libz-dev
+  - sudo apt-get install -y libz-dev
   - pip install . 
 script:
   - python test.py
