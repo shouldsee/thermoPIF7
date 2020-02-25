@@ -1,25 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''
+Use RNASEQ data to derive genes that show PIF7-dependent expression
+and temperature-dependent expression.
 '''
-
+from file_tracer import FileTracer,InputFile,OutputFile  
 from path import Path
+import matplotlib as mpl
+mpl.use('agg')
+
 if __name__ =='__main__':
-
-
     DEBUG = 0
-
-    import matplotlib as mpl
-    mpl.use('agg')
     execfile('./header_import.py')
     import deps.loadRNA_Ath as rnaseq
+    
     keyDF= rnaseq.keyDF
     figs = pyutil.collections.OrderedDict()
+    scores = pd.DataFrame()
+    stats = pd.DataFrame()
 
 
     with Path(__file__+'.result').makedirs_p().realpath() as d:
 
-        stats = pd.DataFrame()
 
         _ = '''
         For each gene derive its temperature responsiveness by
@@ -32,12 +34,8 @@ if __name__ =='__main__':
             'ATHB4',
             'YUC8']
 
-        # tempMarker = [
-        #     'PIF7', 'YUC8'
-        #              ]
-        keyDFC = keyDF.query('BioName in @tempMarker')
+        keyDFC = keyDF.loc[keyDF.BioName.isin(tempMarker)]
         tdfc = tdf.reindex(keyDFC.index)
-        # tdfc = sutil.meanNorm(tdfc)
         tdf.qc_Avg()
         prof = tdfc.T.mean(axis=1)
 
@@ -59,16 +57,26 @@ if __name__ =='__main__':
         per_score = pd.Series(per_score, tdf.index)
         clu = per_score > 0.95
 
+
+
+        ##### adding diagnostic plots
         xs,ys = tdf.summary.MSQ, score
-        pyvis.qc_2var(xs,ys, axs=[None,ax, None,None], clu=clu, nMax=len(clu))
+        pyvis.qc_2var(xs,ys, axs=[None,ax, None,None], 
+                clu=clu, nMax=len(clu))
         pyvis.add_text(xs,ys,keyDF.BioName,ax=ax)
+
         figs['qc_TempReponse'] = fig
-
         stats['tempResponsive'] = clu
+        scores['tempResponsive'] = per_score
 
+
+        _ = '''
+        For each gene derive its PIF7-knockout responsiveness by
+        calculating at its dot-product similarity with a set of
+        marker genes using time-stratified logFC(pif7/wt) profile
+        '''
 
         tdf = rnaseq.rnaseq_pif7col_27C
-        # tempMarker = ['ATHB2','YUC8']#
         keyDFC = keyDF.loc[ keyDF.BioName.isin(tempMarker) ]
         tdfc = tdf.reindex(keyDFC.index)
         # tdfc = sutil.meanNorm(tdfc)
@@ -88,12 +96,8 @@ if __name__ =='__main__':
         prof.plot(xticks = range(len(tdf.columns)),rot='vertical')
 
         i+=1; ax=axs[i]; plt.sca(ax)
-
-        # clu = tdf.eval('@per_score>0.975 & @tdf.summary.SD>0.75')
-        # pyvis.qc_2var(tdf.summary.SD, score, axs=[None,ax, None,None], clu=clu)
-        # clu = tdf.eval('@per_score>0.975 & @tdf.summary.per_MSQ>0.85')
-        # clu = tdf.eval( 'index.isin(@tdf.sort_values("per_score").tail(500).index)')
-        clu = tdf.eval("@per_score > 0.95")
+        per_score = pd.Series(per_score, tdf.index)
+        clu = pd.Series(per_score, tdf.index) > 0.95
 
 
         # clu = clu.to_frame('PIF7Dependent')
@@ -101,36 +105,30 @@ if __name__ =='__main__':
         pyvis.qc_2var(xs,ys, axs=[None,ax, None,None], clu=clu, nMax=len(clu))
         pyvis.add_text(xs,ys,keyDF.BioName,ax=ax)
 
-        stats['PIF7Dependent'] =clu
-        # stats 
-
-        # stats['PIF7
-
         figs['qc_PIF7Dependent'] = fig
+        stats['PIF7Dependent']   = clu
+        scores['PIF7Dependent'] = per_score
 
-        # stats = pd.concat([stats,clu],axis=1)
-        # score.plot.scatter('per',0,ax=ax)
-        # score.plot.
-        # score['per']= pyutil.dist2ppf(score[0])
 
+        _ = '''
+        Venn diagram showing overlap between temperature-responsive gene
+        and pif7ko-responsive genes
+        '''
         xlab = 'tempResponsive'
         ylab = 'PIF7Dependent'
         res = pyvis.qc_index(stats.query(xlab).index, stats.query(ylab).index,silent=0,
                             xlab=xlab,ylab=ylab);
 
         figs['qc_Venn'] = plt.gcf()
-        res[0].to_csv('Venn-index.csv')
+        OF = OutputFile('Venn-index.csv')
+        res[0].to_csv(OF)
 
-        # from pandas.plotting import table
-
-        # keyDF['isTarg'] =keyDF.eval('index.isin(@res[0].indAll)')
         keyDFC = keyDF.merge(stats,left_index=True,right_index=True)
-
-        # fig,ax= plt.subplots(1,1,subplot_kw=dict(frame_on=False))
-        ofname = 'markers.html'
+        ofname = OutputFile('markers.html')
         keyDFC.to_html(ofname)
 
-        stats.to_csv('stats.csv')
+        OF = OutputFile('stats.csv')
+        stats.to_csv(OF)
 
 
         import pymisca.jinja2_util as pyjin
@@ -142,6 +140,7 @@ if __name__ =='__main__':
             exts = ['png',],
             dpi = 160,
             ):
+            templateFile = str(templateFile)
             dfig = pyutil.saveFigDict(figs,
                                       DIR='.',
                                       exts=exts,
@@ -152,10 +151,10 @@ if __name__ =='__main__':
             pyutil.printlines(buf,ofname)
             return dfig
 
-        templateFile = '/home/feng/Templates/listImages.html'
+        templateFile = InputFile('/home/feng/Templates/listImages.html')
         dfig = job__saveFig(figs, d, templateFile)
-        ofname = pyjin.quickRender(templateFile,
+        ofname = pyjin.quickRender(str(templateFile),
                                    context=dfig,
-                                   ofname= d / 'figure.html',
+                                   ofname= OutputFile(d / 'figure.html'),
                                   )
         print ('[OUTPUT]',ofname)
