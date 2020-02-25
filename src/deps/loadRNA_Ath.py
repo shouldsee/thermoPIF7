@@ -7,19 +7,22 @@ with Path(__file__).realpath().dirname().dirname() as d:
     # execfile('./header_import.py')
     import synotil.CountMatrix as scount
     import pymisca.util as pyutil
+    import pymisca.ext as pyext
+    import pandas as pd
 
-    meta  = pyutil.readData( 'deps/meta_rna.csv' )
+    meta  = pyext.readData( 'deps/meta_rna.csv' )
     meta = meta.loc[~meta.index.isna()]
-    keyDF = pyutil.readData( 'deps/key_ath.csv'  )
-    rnaseq = pyutil.readData('deps/rnaseq_log2p1.pk')
+    meta = meta.fillna('NA')
+    keyDF = pyext.readData( 'deps/key_ath.csv'  )
+    rnaseq = pyext.readData('deps/rnaseq_log2p1.pk')
 
 
     assert 'Age' in meta
     # execfile('/home/feng/meta/header_0903.py')
 
     # # meta  = pyutil.readData( 'deps/meta_rna.csv' )
-    meta = pyutil.readData('/home/feng/meta/meta_rna.tsv')
-    meta = meta.loc[~meta.index.isna()]
+    # meta = pyutil.readData('/home/feng/meta/meta_rna.tsv')
+    # meta = meta.loc[~meta.index.isna()]
 
     # keyDF = pyutil.readData( 'deps/key_ath.csv'  )
     # rnaseq = pyutil.readData('deps/rnaseq_log2p1.pk')
@@ -34,7 +37,6 @@ with Path(__file__).realpath().dirname().dirname() as d:
     rnaseq.qc_Avg()
     rnaseq = rnaseq.reindex(rnaseq.summary.query( 'per_M > 0.4' ).index)
 
-
     meta = meta.sort_values(['Age',
                              'gtype',
                              'ZTime_int',])
@@ -47,12 +49,12 @@ with Path(__file__).realpath().dirname().dirname() as d:
                                 how='inner',
                                 sort=False)
 
-
-    tdf = pyutil.init_DF(
+    tdf = pd.DataFrame(
         (rnaseq.reindex(columns = mm.DataAcc_x).values 
            - rnaseq.reindex(columns = mm.DataAcc_y).values ),
-        
-        rowName = rnaseq.index, colName = mm.DataAcc_x,)
+        rnaseq.index,
+        mm.DataAcc_x,
+        )
 
     tdf = scount.countMatrix(tdf,colMeta=meta.reindex(mm.DataAcc_x))
 
@@ -75,10 +77,11 @@ with Path(__file__).realpath().dirname().dirname() as d:
     mm = m1.reset_index().merge(m2.reset_index(),on=['ZTime_int','Age'],how='inner',sort=True)
 
 
-    tdf = pyutil.init_DF(
+    tdf = pd.DataFrame(
         (rnaseq.reindex(columns = mm.DataAcc_x).values 
          - rnaseq.reindex(columns = mm.DataAcc_y).values ),    
-        rowName = rnaseq.index,colName = mm.DataAcc_x,)
+        rnaseq.index,
+        mm.DataAcc_x,)
 
     tdf = scount.countMatrix(tdf,colMeta=meta.reindex(mm.DataAcc_x))
 
@@ -103,11 +106,11 @@ with Path(__file__).realpath().dirname().dirname() as d:
     mm = m1.reset_index().merge(m2.reset_index(),on=['ZTime_int',],how='inner',sort=True)
 
 
-    tdf = pyutil.init_DF(
+    tdf = pd.DataFrame(
         (rnaseq.reindex(columns = mm.DataAcc_x).values 
            - rnaseq.reindex(columns = mm.DataAcc_y).values ),
-        
-        rowName = rnaseq.index,colName = mm.DataAcc_x,)
+        rnaseq.index,
+        mm.DataAcc_x,)
 
     tdf = scount.countMatrix(tdf,colMeta=meta.reindex(mm.DataAcc_x))
 
@@ -133,11 +136,11 @@ with Path(__file__).realpath().dirname().dirname() as d:
     mm = m1.reset_index().merge(m2.reset_index(),on='ZTime_int',how='inner',sort=True)
 
 
-    tdf = pyutil.init_DF(
+    tdf = pd.DataFrame(
         (rnaseq.reindex(columns = mm.DataAcc_x).values 
            - rnaseq.reindex(columns = mm.DataAcc_y).values ),
-        
-        rowName = rnaseq.index,colName = mm.DataAcc_x,)
+        rnaseq.index,
+        mm.DataAcc_x,)
 
     tdf = scount.countMatrix(tdf,colMeta=meta.reindex(mm.DataAcc_x))
 

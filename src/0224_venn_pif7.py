@@ -4,18 +4,30 @@
 Use RNASEQ data to derive genes that show PIF7-dependent expression
 and temperature-dependent expression.
 '''
+DEBUG = 0
 from file_tracer import FileTracer,InputFile,OutputFile  
 from path import Path
-import matplotlib as mpl
-mpl.use('agg')
+
+import matplotlib as mpl; mpl.use('agg')
+from pymisca.util import saveFigDict
+import matplotlib.pyplot as plt
+import pymisca.vis_util as pyvis
+
+import pymisca.ext as pyext
+import collections
+import pandas as pd
+import pymisca.jinja2_util as pyjin
+
+#### data depdendency
+from short_header import job_process
+import deps.loadRNA_Ath as rnaseq
+
+
 
 if __name__ =='__main__':
-    DEBUG = 0
-    execfile('./header_import.py')
-    import deps.loadRNA_Ath as rnaseq
-    
+
     keyDF= rnaseq.keyDF
-    figs = pyutil.collections.OrderedDict()
+    figs = collections.OrderedDict()
     scores = pd.DataFrame()
     stats = pd.DataFrame()
 
@@ -41,7 +53,7 @@ if __name__ =='__main__':
 
         #### calculate ranking score for each gene
         score = tdf.dot(prof.values)
-        per_score= pyutil.dist2ppf(score)
+        per_score= pyext.dist2ppf(score)
 
         fig,axs = plt.subplots(1,3,figsize=[16,4])
         i = -1
@@ -84,7 +96,7 @@ if __name__ =='__main__':
         prof = tdfc.T.mean(axis=1)
 
         score = tdf.dot(prof.values)
-        per_score= pyutil.dist2ppf(score)
+        per_score= pyext.dist2ppf(score)
 
         fig,axs = plt.subplots(1,3,figsize=[16,4])
         i = -1
@@ -131,9 +143,7 @@ if __name__ =='__main__':
         stats.to_csv(OF)
 
 
-        import pymisca.jinja2_util as pyjin
-        import pymisca.util as pyutil
-        def job__saveFig(
+        def job_saveFig(
             figs,
             DIR,
             templateFile,
@@ -141,20 +151,22 @@ if __name__ =='__main__':
             dpi = 160,
             ):
             templateFile = str(templateFile)
-            dfig = pyutil.saveFigDict(figs,
+            dfig = saveFigDict(figs,
                                       DIR='.',
                                       exts=exts,
                                       dpi = dpi)
             dfig['fignames'] = [x for x in dfig['fignames'] if x.endswith('.png')]
-            buf=[pyutil.ppJson(dfig)]
+            buf=[pyext.ppJson(dfig)]
             ofname = 'figures.json'
-            pyutil.printlines(buf,ofname)
+            pyext.printlines(buf,ofname)
             return dfig
 
         templateFile = InputFile('/home/feng/Templates/listImages.html')
-        dfig = job__saveFig(figs, d, templateFile)
+        dfig = job_saveFig(figs, d, templateFile)
         ofname = pyjin.quickRender(str(templateFile),
                                    context=dfig,
                                    ofname= OutputFile(d / 'figure.html'),
                                   )
         print ('[OUTPUT]',ofname)
+    # assert 0
+    # import pdb;pdb.set_trace()
