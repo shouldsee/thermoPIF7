@@ -2,4 +2,4 @@
 pymisca@http://github.com/shouldsee/pymisca/tarball/master
 synotil@http://github.com/shouldsee/synotil/tarball/master
 path.py
-matplotlib
+matplotlib==2.2.3
